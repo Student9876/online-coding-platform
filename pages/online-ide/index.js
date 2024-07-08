@@ -14,10 +14,30 @@ const OnlineIDE = () => {
     const [output, setOutput] = useState('');
 
     const handleRunCode = async () => {
-        // Logic to send the code and input to the server and get the output
-        // For demonstration, we'll just echo the code
-        setOutput(`Code: ${code}\nInput: ${input}`);
-    };
+        if (language === 'cpp') {
+            try {
+                const response = await fetch('/api/compile/cpp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ code, input }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Error:', errorData);
+                    setOutput(`Error: ${errorData.error}\nDetails: ${errorData.details}`);
+                } else {
+                    const data = await response.json();
+                    setOutput(data.output);
+                }
+            } catch (error) {
+                console.error('Unexpected error:', error);
+                setOutput(`Unexpected error: ${error.toString()}`);
+            }
+        };
+    }
 
     return (
         <main>
@@ -63,9 +83,9 @@ const OnlineIDE = () => {
                                         mode: language === 'cpp' ? 'text/x-c++src' : 'python',
                                         theme: 'material',
                                         lineNumbers: true,
-                                        viewportMargin: 20,
+                                        viewportMargin: Infinity, // Ensure it displays multiple lines by default
                                     }}
-                                    onChange={(editor, data, value) => {
+                                    onChange={(value) => {
                                         setCode(value);
                                     }}
                                     className="mt-1"
