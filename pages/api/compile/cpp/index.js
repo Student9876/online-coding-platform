@@ -2,6 +2,16 @@ import fs from 'fs';
 import { exec } from 'child_process';
 import path from 'path';
 
+
+const ensureTmpDir = async () => {
+    const tmpDir = '/tmp';
+    try {
+        await fs.access(tmpDir);
+    } catch {
+        await fs.mkdir(tmpDir);
+    }
+};
+
 export default async function handler(req, res) {
     if (req.method === 'POST') {
         const { code, input } = req.body;
@@ -45,6 +55,9 @@ export default async function handler(req, res) {
             // Write the code and input to files
 
             // For vercel server we need to write to /tmp directory
+
+            await ensureTmpDir();
+
             await fs.writeFile(codeFile, code);
             await fs.writeFile(inputFile, input);
 
