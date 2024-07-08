@@ -6,9 +6,15 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
         const { code, input } = req.body;
         // Define file paths
-        const codeFilePath = path.join(process.cwd(), 'code.cpp');
-        const inputFilePath = path.join(process.cwd(), 'input.txt');
-        const executablePath = path.join(process.cwd(), 'a.exe'); // For Windows systems
+        // const codeFilePath = path.join(process.cwd(), 'code.cpp');
+        // const inputFilePath = path.join(process.cwd(), 'input.txt');
+        // const executablePath = path.join(process.cwd(), 'a.exe'); // For Windows systems
+
+
+        // For unix systems 
+        const codeFile = path.join('/tmp', 'code.cpp');
+        const inputFile = path.join('/tmp', 'input.txt');
+        const outputFile = path.join('/tmp', 'output.txt');
 
         console.log('Code:', code);
         try {
