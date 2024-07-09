@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar/Navbar';
 import Head from 'next/head';
 
-// Import react-codemirror2 dynamically to avoid SSR issues
+
 const CodeMirror = dynamic(() => import('@uiw/react-codemirror'), { ssr: false });
 
 const OnlineIDE = () => {
@@ -14,29 +14,34 @@ const OnlineIDE = () => {
     const [output, setOutput] = useState('');
 
     const handleRunCode = async () => {
-        if (language === 'cpp') {
-            try {
-                const response = await fetch('/api/compile/cpp', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ code, input }),
-                });
+        const apiRoute = language === 'cpp' ? '/api/compile/cpp' : '/api/compile/python';
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('Error:', errorData);
-                    setOutput(`Error: ${errorData.error}\nDetails: ${errorData.details}`);
-                } else {
-                    const data = await response.json();
-                    setOutput(data.output);
-                }
-            } catch (error) {
-                console.error('Unexpected error:', error);
-                setOutput(`Unexpected error: ${error.toString()}`);
+        try {
+            const response = await fetch(apiRoute, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code, input }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error:', errorData);
+                setOutput(`Error: ${errorData.error}\nDetails: ${errorData.details}`);
+            } else {
+                const data = await response.json();
+                setOutput(data.output);
             }
-        };
+        } catch (error) {
+            console.error('Unexpected error:', error);
+            setOutput(`Unexpected error: ${error.toString()}`);
+        }
+    };
+
+    function changeLanguage(e) {
+        setLanguage(e.target.value);
+        setCode('');
     }
 
     return (
@@ -57,48 +62,48 @@ const OnlineIDE = () => {
                 <div className="flex flex-col lg:flex-row gap-4">
                     {/* Left Side */}
                     <div className="flex-1">
-                        <div className="mb-4">
-                            <label htmlFor="language" className="block text-sm font-medium text-gray-700">
-                                Select Language
-                            </label>
-                            <select
-                                id="language"
-                                name="language"
-                                value={language}
-                                onChange={(e) => setLanguage(e.target.value)}
-                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                            >
-                                <option value="cpp">C++</option>
-                                <option value="python">Python</option>
-                            </select>
-                        </div>
-                        <div className="mb-4">
-                            <label htmlFor="code" className="block text-sm font-medium text-gray-700">
-                                Code
-                            </label>
-                            <div className="border rounded-md">
-                                <CodeMirror
-                                    value={code}
-                                    options={{
-                                        mode: language === 'cpp' ? 'text/x-c++src' : 'python',
-                                        theme: 'material',
-                                        lineNumbers: true,
-                                        viewportMargin: Infinity, // Ensure it displays multiple lines by default
-                                    }}
-                                    onChange={(value) => {
-                                        setCode(value);
-                                    }}
-                                    className="mt-1"
-                                />
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <label htmlFor="language" className="block text-sm font-medium text-gray-700">
+                                    Select Language
+                                </label>
+                                <select
+                                    id="language"
+                                    name="language"
+                                    value={language}
+                                    onChange={(e) => changeLanguage(e)}
+                                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                >
+                                    <option value="cpp">C++</option>
+                                    <option value="python">Python</option>
+                                </select>
                             </div>
-                        </div>
-                        <div className="mb-4">
                             <button
                                 onClick={handleRunCode}
                                 className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
                                 Run Code
                             </button>
+                        </div>
+                        <div className="mb-4">
+                            <label htmlFor="code" className="block text-sm font-medium text-gray-700">
+                                Code
+                            </label>
+                            <div className="border rounded-md h-96">
+                                <CodeMirror
+                                    value={code}
+                                    options={{
+                                        mode: language === 'cpp' ? 'text/x-c++src' : 'python',
+                                        theme: 'material',
+                                        lineNumbers: true,
+                                        viewportMargin: Infinity,
+                                    }}
+                                    onChange={(value) => {
+                                        setCode(value);
+                                    }}
+                                    className="mt-1 h-full lg:w-[800px] md:w-full"
+                                />
+                            </div>
                         </div>
                     </div>
 
@@ -111,7 +116,7 @@ const OnlineIDE = () => {
                             <textarea
                                 id="input"
                                 name="input"
-                                rows={4}
+                                rows={10}
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
@@ -124,7 +129,7 @@ const OnlineIDE = () => {
                             <textarea
                                 id="output"
                                 name="output"
-                                rows={4}
+                                rows={10}
                                 value={output}
                                 readOnly
                                 className="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-100"
