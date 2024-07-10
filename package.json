@@ -16,6 +16,7 @@
     "axios": "^1.7.2",
     "child-process": "^1.0.2",
     "codemirror": "^6.0.1",
+    "cookie-parser": "^1.4.6",
     "fs": "^0.0.1-security",
     "next": "14.2.4",
     "react": "^18",

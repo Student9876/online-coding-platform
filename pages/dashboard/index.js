@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import Navbar from '@/components/Navbar/Navbar';
 
 const Dashboard = () => {
     const { isLoggedIn } = useSelector((state) => state.auth);
@@ -18,6 +19,7 @@ const Dashboard = () => {
 
     return (
         <div>
+            <Navbar />
             <h1>Dashboard</h1>
             <p>Welcome to the dashboard!</p>
         </div>
